@@ -1,0 +1,11 @@
+version: '3'
+services:
+
+  shinyboard:
+    image: harvard-dce/dce-shinyboard
+    ports:
+      - "3838:3838"
+    volumes:
+      - ./apps:/srv/shiny-server/apps
+      - ./logs:/var/log/shiny-server
+

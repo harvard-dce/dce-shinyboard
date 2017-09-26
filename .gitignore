@@ -1,0 +1,6 @@
+logs/*.log
+logs/*/
+.Rhistory
+.Rproj.user
+packrat/lib*/
+packrat/src/
