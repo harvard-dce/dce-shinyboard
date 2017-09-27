@@ -12,7 +12,7 @@ RUN R -e "devtools::install_github('rstudio/packrat')"
 
 COPY ./apps /srv/shiny-server/apps
 
-RUN R -e "install.packages(packrat:::dirDependencies('/srv/shiny-server'))"
+RUN R -e "install.packages(packrat:::dirDependencies('/srv/shiny-server/apps'))"
 
 COPY ./assets/shiny-server.conf /etc/shiny-server/shiny-server.conf
 

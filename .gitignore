@@ -1,5 +1,6 @@
 logs/*.log
 logs/*/
+data/*.*
 .Rhistory
 .Rproj.user
 packrat/lib*/
