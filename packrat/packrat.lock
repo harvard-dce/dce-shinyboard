@@ -1,5 +1,5 @@
 PackratFormat: 1.4
-PackratVersion: 0.4.8.1
+PackratVersion: 0.4.8.41
 RVersion: 3.4.1
 Repos: CRAN=https://cran.rstudio.com/
 
@@ -11,6 +11,7 @@ Hash: 95f62be4d6916aae14a310a8b56a6475
 Package: DT
 Source: CRAN
 Version: 0.2
+Hash: 36b032203797956fedad5a25055016a9
 Requires: htmltools, htmlwidgets, magrittr
 
 Package: R6
@@ -59,6 +60,7 @@ Hash: e53fb8c58673df868183697e39a6a4d6
 Package: dotenv
 Source: CRAN
 Version: 1.0.2
+Hash: 519cd2bd051a57af796091379ee3ca69
 
 Package: dplyr
 Source: CRAN
@@ -92,7 +94,8 @@ Requires: Rcpp, digest
 Package: htmlwidgets
 Source: CRAN
 Version: 0.9
-Requires: jsonlite, htmltools, yaml
+Hash: 7514f6ea9f3bef6d9b6c945095275302
+Requires: htmltools, jsonlite, yaml
 
 Package: httpuv
 Source: CRAN
@@ -168,11 +171,15 @@ Version: 0.7
 Hash: e2ebaff8160aff3e6b32e6e78a693c2d
 
 Package: shiny
-Source: CRAN
-Version: 1.0.5
-Hash: 4d47532a807122bfd6bc3818310f9d2e
+Source: github
+Version: 1.0.5.9000
+Hash: 5cd8e50fb8609a59669e06562aa91b38
 Requires: R6, digest, htmltools, httpuv, jsonlite, mime, sourcetools,
     xtable
+GithubRepo: shiny
+GithubUsername: rstudio
+GithubRef: master
+GithubSha1: 176fe699b92e29edf0d48de167257008b0f69b09
 
 Package: shinyBS
 Source: CRAN
@@ -200,6 +207,7 @@ Hash: 226d56d7469587da40b0f96180e711b4
 Package: sparkline
 Source: CRAN
 Version: 2.0
+Hash: 180ff3414d20b647d826a5af8466f483
 Requires: htmltools, htmlwidgets
 
 Package: stringi
@@ -237,3 +245,4 @@ Hash: 7293235cfcc14cdff1ce7fd1a0212031
 Package: yaml
 Source: CRAN
 Version: 2.1.14
+Hash: c81230c3a7d9ba20607ad6b4331173d1
