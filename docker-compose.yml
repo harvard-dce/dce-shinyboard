@@ -3,9 +3,10 @@ services:
 
   shinyboard:
     image: harvard-dce/dce-shinyboard
+    network_mode: "host"
     ports:
       - "3838:3838"
     volumes:
       - ./apps:/srv/shiny-server/apps
+      - ./data:/srv/shiny-server/data
       - ./logs:/var/log/shiny-server
-

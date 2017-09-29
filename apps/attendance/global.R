@@ -1,18 +1,12 @@
-#rm(list=ls())
+rm(list=ls())
 
-library(elasticsearchr)
+library(elastic)
 library(dplyr)
 library(shiny)
 library(stringr)
 library(lubridate)
+library(dotenv)
 
 source("config.R")
 source("es.R")
-
-tryCatch({
-  es <- elasticsearchr::elastic_version()
-}, error = function(ex) {
-  print("Unable to communicate with Elasticsearch");
-  stopApp(1)
-})
 

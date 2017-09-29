@@ -16,5 +16,7 @@ RUN R -e "install.packages(packrat:::dirDependencies('/srv/shiny-server/apps'))"
 
 COPY ./assets/shiny-server.conf /etc/shiny-server/shiny-server.conf
 
+VOLUME /srv/shiny-server/apps
+VOLUME /srv/shiny-server/data
 
 
