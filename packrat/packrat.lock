@@ -69,6 +69,12 @@ Hash: 8083d22491cbb94e00727a9d7f590bf5
 Requires: BH, R6, Rcpp, assertthat, bindrcpp, glue, magrittr,
     pkgconfig, plogr, rlang, tibble
 
+Package: elastic
+Source: CRAN
+Version: 0.8.0
+Hash: 5633a9a9ef0a754f3bdcac09196b60f6
+Requires: curl, httr, jsonlite
+
 Package: elasticsearchr
 Source: CRAN
 Version: 0.2.0
@@ -192,6 +198,12 @@ Source: CRAN
 Version: 1.1.0
 Hash: 4f8556eba12476b5f03e757c34c9747d
 Requires: shiny, shinyBS, shinythemes
+
+Package: shinydashboard
+Source: CRAN
+Version: 0.6.1
+Hash: b48e9bf83e320416eca507dd0d75b362
+Requires: htmltools, shiny
 
 Package: shinythemes
 Source: CRAN

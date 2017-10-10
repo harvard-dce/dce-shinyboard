@@ -18,24 +18,52 @@ ui <- fluidPage(
     div(style="padding: 1px 0px; width: '100%'",
         titlePanel(
             title="",
-            windowTitle="Window Tab title"
+            windowTitle="DCE Learning Analytics Dashboard"
         )
     ),
 
     navbarPage(
-        title=div(img(src="Rlogo.png"), "Application NavBar Title"),
+        title=div(img(src="dce.gif", width="30", height="30"), "DCE Learning Analytics"),
                inverse = F, # for diff color view
                theme = shinytheme("united"),
 
-               tabPanel("Home Page 1", icon = icon("home"),
+               tabPanel("Home", icon = icon("home"),
 
-                        jumbotron("Hi ShinyLP!", "Call attention to important application features or provide guidance",
-                                  buttonLabel = "Click Me"),
+                        jumbotron("Welcome!", "Call attention to important application features or provide guidance",
+                                  buttonLabel = "Intro Video"),
+                        fluidRow(
+                          column(4, thumbnail_label(image = 'Rlogo.png', label = 'Attendance Reports',
+                                      content = 'Havana brown cornish rex bombay but bombay,
+                                              but havana brown devonshire rex and devonshire rex.
+                                              Tomcat egyptian mau. Cornish rex sphynx sphynx yet
+                                              cougar and panther. Panther siberian. Lynx munchkin
+                                              american shorthair. Norwegian forest. ',
+                                      button_link = '/attendance', button_label = 'Click me')
+                                 ),
+                          column(4, thumbnail_label(image = 'Rlogo.png', label = 'Lecture Views',
+                                                    content = 'Havana brown cornish rex bombay but bombay,
+                                                    but havana brown devonshire rex and devonshire rex.
+                                                    Tomcat egyptian mau. Cornish rex sphynx sphynx yet
+                                                    cougar and panther. Panther siberian. Lynx munchkin
+                                                    american shorthair. Norwegian forest. ',
+                                                    button_link = '/lectures', button_label = 'Click me')),
+                          column(4, thumbnail_label(image = 'Rlogo.png', label = 'Live Viewing',
+                                                    content = 'Havana brown cornish rex bombay but bombay,
+                                                    but havana brown devonshire rex and devonshire rex.
+                                                    Tomcat egyptian mau. Cornish rex sphynx sphynx yet
+                                                    cougar and panther. Panther siberian. Lynx munchkin
+                                                    american shorthair. Norwegian forest. ',
+                                                    button_link = '/live', button_label = 'Click me'))),
+
                          fluidRow(
-                          column(6, panel_div(class_type = "primary", panel_title = "Directions",
+                          column(6, panel_div("info", panel_title = "Directions",
                                               content = "How to use the app")),
-                          column(6, panel_div("success", "Application Maintainers",
-                                             "Email Me: <a href='mailto:jasmine.dumas@gmail.com?Subject=Shiny%20Help' target='_top'>Jasmine Dumas</a>"))
+                          column(6, panel_div("success", "Application Developers",
+                                              tags$ul(
+                                                tags$li(tags$a(href="mailto:jay_luker@harvard.edu", "Jay Luker")),
+                                                tags$li(tags$a(href="mailto:phoebemiller@g.harvard.edu", "Phoebe Miller"))
+                                              )
+                          ))
                         ),  # end of fluidRow
                         fluidRow(
                           column(6, panel_div("info", "App Status", "Include text with status, version and updates")),
@@ -53,7 +81,7 @@ ui <- fluidPage(
                                   )
 
                         )),
-               tabPanel("Home Page 2", icon = icon("cog"),
+               tabPanel("About",
                         wells(content = "Imporant Info can go up here before a
                               user starts exploring the application and its features",
                               size = "default"),
@@ -64,39 +92,9 @@ ui <- fluidPage(
                                      list_item("User Updates", badge_value = 24)))
 
 
-                        ),
-
-               tabPanel("Home Page 3", icon = icon("calendar"),
-
-                        jumbotron("Hello shinyLP!", "Dock Several Applications on a page as a portal",
-                                  button = FALSE),
-                        hr(),
-                        fluidRow(
-                          column(4, thumbnail_label(image = 'Rlogo.png', label = 'Application 1',
-                                      content = 'Havana brown cornish rex bombay but bombay,
-                                              but havana brown devonshire rex and devonshire rex.
-                                              Tomcat egyptian mau. Cornish rex sphynx sphynx yet
-                                              cougar and panther. Panther siberian. Lynx munchkin
-                                              american shorthair. Norwegian forest. ',
-                                      button_link = 'http://getbootstrap.com/', button_label = 'Click me')
-                                 ),
-                          column(4, thumbnail_label(image = 'Rlogo.png', label = 'Application 2',
-                                                    content = 'Havana brown cornish rex bombay but bombay,
-                                                    but havana brown devonshire rex and devonshire rex.
-                                                    Tomcat egyptian mau. Cornish rex sphynx sphynx yet
-                                                    cougar and panther. Panther siberian. Lynx munchkin
-                                                    american shorthair. Norwegian forest. ',
-                                                    button_link = 'http://getbootstrap.com/', button_label = 'Click me')),
-                          column(4, thumbnail_label(image = 'Rlogo.png', label = 'Application 3',
-                                                    content = 'Havana brown cornish rex bombay but bombay,
-                                                    but havana brown devonshire rex and devonshire rex.
-                                                    Tomcat egyptian mau. Cornish rex sphynx sphynx yet
-                                                    cougar and panther. Panther siberian. Lynx munchkin
-                                                    american shorthair. Norwegian forest. ',
-                                                    button_link = 'http://getbootstrap.com/', button_label = 'Click me'))
-
-                        )))
-
+                        )
+    )
 )
+
 
 shinyApp(ui = ui, server = server)

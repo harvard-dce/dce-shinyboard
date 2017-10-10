@@ -68,14 +68,8 @@ server <- function(input, output, session) {
         ) / 60), "m", sep = "")
       )
 
-      #      sparkline.data <-
-      #      sparkline.style <- "type: 'line'"
-      #      sparkline.coldefs <- list(list(targets = 1, render = JS("function(data, type, full){ return '<span class=sparkSamples>' + data + '</span>' }")))
-      #      sparkline.callback <- JS(paste0("function (oSettings, json) {\n  $('.sparkSamples:not(:has(canvas))').sparkline('html', { ", sparkline.style, " });\n}"), collapse = "")
-      #
-      output$lectureTable <- renderDataTable({
+      output$lectureTable <- DT::renderDataTable({
         # generate the attendance column
-        browser()
         message(paste0(c("course input: ", input$course)))
         lectureTable <-
           lectures %>% rowwise() %>% mutate(attendance = lectureAttendance(input$course, mpid))
@@ -92,7 +86,7 @@ server <- function(input, output, session) {
       students <-
         dplyr::filter(rollcall, series == input$course & reg_level != "S")
 
-      output$studentTable <- renderDataTable({
+      output$studentTable <- DT::renderDataTable({
         studentTable <-
           students %>% rowwise() %>% mutate(attendance = studentAttendance(lectures, huid))
         # create column contining full name
@@ -112,40 +106,68 @@ server <- function(input, output, session) {
         studentTable <- select(studentTable, one_of(student.fields))
 
       }) #, rownames = F)
+
+      browser()
+      output$totalLectures <- renderValueBox({
+        valueBox(
+          value = nrow(lectures),
+          subtitle = "Total Lectures"
+        )
+      })
+
+      output$totalStudents <- renderValueBox({
+        valueBox(
+          value = nrow(students),
+          subtitle = "Total Students"
+        )
+      })
+
+      output$totalDuration <- renderValueBox(
+        valueBox(
+          value = 50000,
+          subtitle = "Total Duration"
+        )
+      )
     }
   },
   ignoreNULL = T,
   ignoreInit = T)
 }
 
-ui <- fluidPage(verticalLayout(
-  # Application title
-  titlePanel("Lecture Attendance Reports"),
-  fluidRow(column(
-    6,
-    selectInput("term", "Term:", term.options, selected = default.term)
-  ),
-  column(
-    6,
-    selectInput("course", "Course:", list())
-  )),
-  column(12,
-         tabsetPanel(
-           tabPanel(
-             "Lectures",
-             tags$head(tags$style(HTML(
-               ' .tab-content {margin-top: 20px;}'
-             ))),
-             dataTableOutput("lectureTable")
-           ),
-           tabPanel(
-             "Students",
-             tags$head(tags$style(HTML(
-               ' .tab-content {margin-top: 20px;}'
-             ))),
-             dataTableOutput("studentTable")
-           )
-         ))
-))
+header <-  dashboardHeader(title = "Attendance Reports")
 
+sidebar <-  dashboardSidebar(
+  verticalLayout(
+    selectInput("term", "Term:", term.options, selected = default.term),
+    selectInput("course", "Course:", list())
+  )
+)
+
+body <-  dashboardBody(
+    fluidRow(
+      valueBoxOutput("totalLectures"),
+      valueBoxOutput("totalStudents"),
+      valueBoxOutput("totalDuration")
+    ),
+    fluidRow(
+      column(12,
+        box(
+          title="Lectures",
+          width = NULL,
+          solidHeader = TRUE,
+          status = "primary",
+          dataTableOutput("lectureTable")
+        ),
+        box(
+          title="Students",
+          width = NULL,
+          solidHeader = TRUE,
+          status = "primary",
+          dataTableOutput("studentTable")
+        )
+      )
+    )
+)
+
+ui <- dashboardPage(header, sidebar, body)
 shinyApp(ui = ui, server = server)
