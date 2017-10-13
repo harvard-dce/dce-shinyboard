@@ -18,11 +18,8 @@ server <- function(input, output, session) {
     filter(rollcall, series == series.id & reg_level != "S")
   }
 
-  lectureAttendance <- function(series.id, mp.id) {
-    students <- studentList(series.id)
-    attended <-
-      filter(attendance, mpid == mp.id & huid %in% students$huid)
-    paste(nrow(attended), "of", nrow(students))
+  lectureAttendance <- function(students, mp.id) {
+    nrow(filter(attendance, mpid == mp.id & huid %in% students$huid))
   }
 
   lectureScores <- function(series.id, mp.id) {
@@ -31,9 +28,7 @@ server <- function(input, output, session) {
   }
 
   studentAttendance <- function(lectures, student.id) {
-    attended <-
-      filter(attendance, huid == student.id & mpid %in% lectures$mpid)
-    paste(nrow(attended), "of", nrow(lectures))
+    nrow(filter(attendance, huid == student.id & mpid %in% lectures$mpid))
   }
 
   observeEvent(input$term, {
@@ -62,17 +57,24 @@ server <- function(input, output, session) {
       # format duration, available date, and add attendance column
       lectures <- mutate(
         lectures,
-        available = with_tz(ymd_hms(available, tz = default.tz)),
-        duration = paste(as.integer((
-          duration / 1000
-        ) / 60), "m", sep = "")
+        available = as.Date(available), # with_tz(ymd_hms(available, tz = default.tz)),
+        duration = lubridate::seconds_to_period(duration / 1000)
       )
 
+      message(paste0(c("course input: ", input$course)))
+
+      students <- studentList(input$course)
+      # generate the attended column
+      lectures <- lectures %>% rowwise() %>% mutate(attended = lectureAttendance(students, mpid))
+
       output$lectureTable <- DT::renderDataTable({
-        # generate the attendance column
-        message(paste0(c("course input: ", input$course)))
-        lectureTable <-
-          lectures %>% rowwise() %>% mutate(attendance = lectureAttendance(input$course, mpid))
+
+        lectureTable <- transform(
+          lectures,
+          attendance = paste(attended, "of", nrow(students)),
+          duration = sprintf('%02d:%02d:%02.0f', duration@hour, duration@minute, second(duration))
+        )
+
         # prune to columns we want
         lectureTable <-
           dplyr::select(lectureTable, one_of(lecture.fields))
@@ -83,21 +85,15 @@ server <- function(input, output, session) {
       }) #, rownames = F)
 
       # get the student list for this course
-      students <-
-        dplyr::filter(rollcall, series == input$course & reg_level != "S")
+      students <- dplyr::filter(rollcall, series == input$course & reg_level != "S")
+      students <- students %>% rowwise() %>% mutate(attended = studentAttendance(lectures, huid))
 
       output$studentTable <- DT::renderDataTable({
-        studentTable <-
-          students %>% rowwise() %>% mutate(attendance = studentAttendance(lectures, huid))
+        studentTable <- students %>% rowwise() %>% mutate(attendance = paste(attended, "of", nrow(lectures)))
         # create column contining full name
         studentTable <-
           dplyr::mutate(studentTable, name = paste(first_name, mi, last_name))
 
-        # insert random stuff for demo
-        studentTable <- studentTable[1:20, ]
-        studentTable$name <- random.names
-        studentTable$huid <-
-          sample(10000000:99999999, 20, replace = FALSE)
         studentTable <- studentTable[order(studentTable$name), ]
 
         # order by last name
@@ -107,7 +103,6 @@ server <- function(input, output, session) {
 
       }) #, rownames = F)
 
-      browser()
       output$totalLectures <- renderValueBox({
         valueBox(
           value = nrow(lectures),
@@ -122,12 +117,20 @@ server <- function(input, output, session) {
         )
       })
 
-      output$totalDuration <- renderValueBox(
+      output$totalDuration <- renderValueBox({
         valueBox(
           value = 50000,
           subtitle = "Total Duration"
         )
-      )
+      })
+
+      output$lecturePlot <- renderPlot({
+        ggplot2::ggplot(lectures, aes(available, attended)) +
+          geom_line() +
+          scale_x_date(date_labels = "%b-%Y") +
+          xlab("") +
+          ylab("Attendence")
+      })
     }
   },
   ignoreNULL = T,
@@ -150,21 +153,26 @@ body <-  dashboardBody(
       valueBoxOutput("totalDuration")
     ),
     fluidRow(
-      column(12,
-        box(
-          title="Lectures",
-          width = NULL,
-          solidHeader = TRUE,
-          status = "primary",
-          dataTableOutput("lectureTable")
-        ),
-        box(
-          title="Students",
-          width = NULL,
-          solidHeader = TRUE,
-          status = "primary",
-          dataTableOutput("studentTable")
-        )
+      box(
+        plotOutput("lecturePlot")
+      )
+    ),
+    fluidRow(
+      box(
+        title="Lectures",
+        width = NULL,
+        solidHeader = TRUE,
+        status = "primary",
+        dataTableOutput("lectureTable")
+      )
+    ),
+    fluidRow(
+      box(
+        title="Students",
+        width = NULL,
+        solidHeader = TRUE,
+        status = "primary",
+        dataTableOutput("studentTable")
       )
     )
 )
