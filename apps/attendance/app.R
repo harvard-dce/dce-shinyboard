@@ -1,12 +1,18 @@
 source("global.R")
 
-data_file_path <- function(filename) {
+dataFilePath <- function(filename) {
   file.path(data.dir, filename)
 }
 
+getTermData <- function(data_product, term) {
+  file_name <- paste(data_product, term, 'csv', sep = '.')
+  read.csv(dataFilePath(file_name), stringsAsFactors = F)
+}
+
+attendance <- NULL
+rollcall <- NULL
+
 server <- function(input, output, session) {
-  attendance <- read.csv(data_file_path("attendance.csv"))
-  rollcall <- read.csv(data_file_path("rollcall.csv"), stringsAsFactors = F)
   episodes <- reactiveValues(episodes = list())
 
   makeSparkline <- function() {
@@ -32,6 +38,8 @@ server <- function(input, output, session) {
   }
 
   observeEvent(input$term, {
+    attendance <<- getTermData('attendance', input$term)
+    rollcall <<- getTermData('rollcall', input$term)
     episodes$episodes <- episodesByTerm(input$term)
   })
 
@@ -46,22 +54,26 @@ server <- function(input, output, session) {
   })
 
   observeEvent(input$course, {
-    if (input$course != "") {
-      # get the episodes for this course
-      lectures <- dplyr::filter(
-        episodes$episodes,
-        series == input$course &
-          is.na(available) == F &
-          grepl("L", type)
-      )
-      # format duration, available date, and add attendance column
+    req(input$course)
+    message(paste0(c("course input: ", input$course)))
+
+    # get the episodes for this course
+    lectures <- dplyr::filter(
+      episodes$episodes,
+      series == input$course &
+        is.na(available) == F &
+        grepl("L", type)
+    )
+
+    total_duration <- sum(lectures$duration)
+
+    if (nrow(lectures) > 0) {
+
       lectures <- mutate(
         lectures,
-        available = as.Date(available), # with_tz(ymd_hms(available, tz = default.tz)),
+        available = as.Date(available),
         duration = lubridate::seconds_to_period(duration / 1000)
       )
-
-      message(paste0(c("course input: ", input$course)))
 
       students <- studentList(input$course)
       # generate the attended column
@@ -84,46 +96,50 @@ server <- function(input, output, session) {
         lectureTable <- lectureTable[order(lectureTable$available), ]
       }) #, rownames = F)
 
-      # get the student list for this course
-      students <- dplyr::filter(rollcall, series == input$course & reg_level != "S")
-      students <- students %>% rowwise() %>% mutate(attended = studentAttendance(lectures, huid))
+    }
 
-      output$studentTable <- DT::renderDataTable({
-        studentTable <- students %>% rowwise() %>% mutate(attendance = paste(attended, "of", nrow(lectures)))
-        # create column contining full name
-        studentTable <-
-          dplyr::mutate(studentTable, name = paste(first_name, mi, last_name))
+    # get the student list for this course
+    students <- dplyr::filter(rollcall, series == input$course & reg_level != "S")
+    students <- students %>% rowwise() %>% mutate(attended = studentAttendance(lectures, huid))
 
-        studentTable <- studentTable[order(studentTable$name), ]
+    output$studentTable <- DT::renderDataTable({
+      studentTable <- students %>% rowwise() %>% mutate(attendance = paste(attended, "of", nrow(lectures)))
+      # create column contining full name
+      studentTable <-
+        dplyr::mutate(studentTable, name = paste(first_name, mi, last_name))
 
-        # order by last name
-        #studentTable <- studentTable[order(studentTable$last_name),]
-        # prune to the columns we want
-        studentTable <- select(studentTable, one_of(student.fields))
+      studentTable <- studentTable[order(studentTable$name), ]
 
-      }) #, rownames = F)
+      # order by last name
+      #studentTable <- studentTable[order(studentTable$last_name),]
+      # prune to the columns we want
+      studentTable <- select(studentTable, one_of(student.fields))
 
-      output$totalLectures <- renderValueBox({
-        valueBox(
-          value = nrow(lectures),
-          subtitle = "Total Lectures"
-        )
-      })
+    }) #, rownames = F)
 
-      output$totalStudents <- renderValueBox({
-        valueBox(
-          value = nrow(students),
-          subtitle = "Total Students"
-        )
-      })
+    output$totalLectures <- renderValueBox({
+      valueBox(
+        value = nrow(lectures),
+        subtitle = "Total Lectures"
+      )
+    })
 
-      output$totalDuration <- renderValueBox({
-        valueBox(
-          value = 50000,
-          subtitle = "Total Duration"
-        )
-      })
+    output$totalStudents <- renderValueBox({
+      valueBox(
+        value = nrow(students),
+        subtitle = "Total Students"
+      )
+    })
 
+    output$totalDuration <- renderValueBox({
+      td_period = seconds_to_period(total_duration / 1000)
+      valueBox(
+        value = sprintf('%02d:%02d:%02.0f', td_period@hour, td_period@minute, second(td_period)),
+        subtitle = "Total Duration"
+      )
+    })
+
+    if (nrow(lectures) > 0) {
       output$lecturePlot <- renderPlot({
         ggplot2::ggplot(lectures, aes(available, attended)) +
           geom_line() +
@@ -148,13 +164,17 @@ sidebar <-  dashboardSidebar(
 
 body <-  dashboardBody(
     fluidRow(
-      valueBoxOutput("totalLectures"),
-      valueBoxOutput("totalStudents"),
-      valueBoxOutput("totalDuration")
-    ),
-    fluidRow(
-      box(
-        plotOutput("lecturePlot")
+      column(width = 3,
+        valueBoxOutput(width = NULL, "totalLectures"),
+        valueBoxOutput(width = NULL, "totalStudents"),
+        valueBoxOutput(width = NULL, "totalDuration")
+      ),
+      column(width = 9,
+        box(
+          title = "Lecture Attendance Over Time",
+          width = NULL,
+          plotOutput("lecturePlot")
+        )
       )
     ),
     fluidRow(

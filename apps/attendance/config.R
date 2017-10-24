@@ -16,11 +16,12 @@ es.path <- env("ES_PATH", "")
 es.user <- env("ES_USER", NA)
 es.pwd <- env("ES_PWD", NA)
 es.episode.index <- env("ES_EPISODE_INDEX", 'episodes')
-default.term <- env("DEFAULT_TERM", "2017-02")
+default.term <- env("DEFAULT_TERM", "2017-03")
 default.tz <- "America/New_York"
 data.dir <- env("DATA_DIR", "./")
 
 term.options <- c(
+  "Fall 2017" = "2017-03",
   "Spring 2017" = "2017-02",
   "Fall 2016" = "2017-01"
 )
