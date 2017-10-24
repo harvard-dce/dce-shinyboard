@@ -1,12 +1,17 @@
 source("global.R")
 
-data_file_path <- function(filename) {
+dataFilePath <- function(filename) {
   file.path(data.dir, filename)
 }
 
+getTermData <- function(data_product, term) {
+  file_name <- paste(c(data_product, term, 'csv'), sep = '.')
+  read.csv(dataFilePath(file_name), stringsAsFactors = F)
+}
+
 server <- function(input, output, session) {
-  attendance <- read.csv(data_file_path("attendance.csv"))
-  rollcall <- read.csv(data_file_path("rollcall.csv"), stringsAsFactors = F)
+  attendance <- NULL
+  rollcall <- NULL
   episodes <- reactiveValues(episodes = list())
 
   makeSparkline <- function() {
@@ -32,6 +37,8 @@ server <- function(input, output, session) {
   }
 
   observeEvent(input$term, {
+    attendance <- getTermData('attendance', input$term)
+    rollcall <- getTermData('rollcall', input$term)
     episodes$episodes <- episodesByTerm(input$term)
   })
 
