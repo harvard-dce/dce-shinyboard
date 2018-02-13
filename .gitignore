@@ -4,6 +4,5 @@ data/*.*
 .Rhistory
 .Rproj.user
 packrat/lib*/
-packrat/src/
 *.env
 .RData

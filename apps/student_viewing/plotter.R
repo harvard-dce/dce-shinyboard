@@ -280,7 +280,9 @@ wordcloud (
 
 
 
-plot_mpid_totalviews <- function(data, title, guide=FALSE, vline=-1) {
+plot_mpid_totalviews <- function(dtv, guide=FALSE, vline=-1) {
+    data <- dtv$data
+    title <- dtv$title
     g = ggplot(data=data, aes(x=interval, y=viewcount, fill=factor(huid) ))
     g = g + geom_bar(stat = "identity")
     #g = g + scale_x_time(position="bottom")

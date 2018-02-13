@@ -7,20 +7,18 @@ server <- function(input, output, session) {
     query <- parseQueryString(session$clientData$url_search)
 
     if (!is.null(query[['mpid']])) {
-      input$mpid <- query[['mpid']]
-      updateTextInput(session, "mpid", value = mpid)
+      updateTextInput(session, "mpid", value = query[['mpid']])
     }
   })
 
   dtv <- reactive({
-    browser()
     req(input$mpid)
     mpid_totalviews(input$mpid)
   })
 
   output$distPlot <- renderPlot({
-    showGuide = input$guide
-    plot_mpid_totalviews(dtv$data, dtv$title, guide=showGuide, input$scrubber + 10)
+    showGuide <- input$guide
+    plot_mpid_totalviews(dtv(), guide = input$guide, vline = input$scrubber)
   })
 }
 
